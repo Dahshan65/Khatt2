@@ -6,23 +6,6 @@ const green = Color(0xFF2E6B57);
 const gold = Color(0xFF8B6914);
 const cream = Color(0xFFF8F4EA);
 
-// ===== إعدادات الدورة =====
-// رقم قائمة التشغيل على يوتيوب
-const String playlistId = 'PLKhU4fSVw_-I';
-
-// عدد الفيديوهات في القائمة
-const int lessonCount = 18;
-
-// عناوين الدروس بالترتيب (اختياري).
-// إذا تركتها فارغة يظهر "الدرس 1، الدرس 2 ...".
-const List<String> lessonTitles = [];
-
-String lessonTitle(int index) {
-  if (index < lessonTitles.length) return lessonTitles[index];
-  return 'الدرس ${index + 1}';
-}
-// ==========================
-
 void main() {
   runApp(const RewaqApp());
 }
@@ -48,6 +31,36 @@ class RewaqApp extends StatelessWidget {
     );
   }
 }
+
+class Lesson {
+  final String title;
+  final String videoId;
+
+  const Lesson(this.title, this.videoId);
+}
+
+// قائمة الدروس: (عنوان الدرس، رقم الفيديو على يوتيوب)
+// لتغيير عنوان أي درس عدّل النص الأول فقط.
+const List<Lesson> lessons = [
+  Lesson('الدرس 1', '_vQZSASHs-4'),
+  Lesson('الدرس 2', 'g8Rh2Bo99IA'),
+  Lesson('الدرس 3', '3BLZXe9mB0c'),
+  Lesson('الدرس 4', 'Z9l1HuUAZWE'),
+  Lesson('الدرس 5', '2lB-GWnC4_A'),
+  Lesson('الدرس 6', 'gx4qFC-b9tA'),
+  Lesson('الدرس 7', 'KDlKJmZLAjQ'),
+  Lesson('الدرس 8', 'ar1gnMjCVLs'),
+  Lesson('الدرس 9', '56kr_jme3lQ'),
+  Lesson('الدرس 10', 'tdRbIzHTLbc'),
+  Lesson('الدرس 11', '9REIf2p-MfA'),
+  Lesson('الدرس 12', 'IeGwC5EsG00'),
+  Lesson('الدرس 13', 'tivA7CK9rXU'),
+  Lesson('الدرس 14', '9iZqMZHLm3o'),
+  Lesson('الدرس 15', 'gkKBh-xJXNY'),
+  Lesson('الدرس 16', 'pb0w0aWOMPU'),
+  Lesson('الدرس 17', '0R-qU2O950Y'),
+  Lesson('الدرس 18', 'x1QCRzLsi9A'),
+];
 
 Future<void> openExternal(String address) async {
   final uri = Uri.parse(address);
@@ -206,8 +219,10 @@ class CoursePage extends StatelessWidget {
         ),
         body: ListView.builder(
           padding: const EdgeInsets.all(12),
-          itemCount: lessonCount,
+          itemCount: lessons.length,
           itemBuilder: (context, index) {
+            final lesson = lessons[index];
+
             return Card(
               color: Colors.white,
               margin: const EdgeInsets.only(bottom: 10),
@@ -231,7 +246,7 @@ class CoursePage extends StatelessWidget {
                   ),
                 ),
                 title: Text(
-                  lessonTitle(index),
+                  lesson.title,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -246,7 +261,7 @@ class CoursePage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => VideoPage(index: index),
+                      builder: (_) => VideoPage(lesson: lesson),
                     ),
                   );
                 },
@@ -260,9 +275,9 @@ class CoursePage extends StatelessWidget {
 }
 
 class VideoPage extends StatefulWidget {
-  final int index;
+  final Lesson lesson;
 
-  const VideoPage({super.key, required this.index});
+  const VideoPage({super.key, required this.lesson});
 
   @override
   State<VideoPage> createState() => _VideoPageState();
@@ -275,19 +290,15 @@ class _VideoPageState extends State<VideoPage> {
   void initState() {
     super.initState();
 
-    controller = YoutubePlayerController(
+    controller = YoutubePlayerController.fromVideoId(
+      videoId: widget.lesson.videoId,
+      autoPlay: false,
       params: const YoutubePlayerParams(
         showControls: true,
         showFullscreenButton: true,
         strictRelatedVideos: true,
         playsInline: true,
       ),
-    );
-
-    controller.cuePlaylist(
-      list: const [playlistId],
-      listType: ListType.playlist,
-      index: widget.index,
     );
   }
 
@@ -309,7 +320,7 @@ class _VideoPageState extends State<VideoPage> {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              lessonTitle(widget.index),
+              widget.lesson.title,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 21,
@@ -323,40 +334,6 @@ class _VideoPageState extends State<VideoPage> {
               child: YoutubePlayer(
                 controller: controller,
                 aspectRatio: 16 / 9,
-              ),
-            ),
-            const SizedBox(height: 10),
-            // سطر تشخيص مؤقت: يعرض حالة المشغّل ونوع الخطأ
-            YoutubeValueBuilder(
-              controller: controller,
-              builder: (context, value) {
-                return Text(
-                  'حالة المشغّل: ${value.playerState.name} | الخطأ: ${value.error.name}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 13, color: Colors.black54),
-                );
-              },
-            ),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => openExternal(
-                  'https://www.youtube.com/watch?list=$playlistId&index=${widget.index + 1}',
-                ),
-                icon: const Icon(Icons.open_in_new),
-                label: const Text(
-                  'فتح الدرس في يوتيوب',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: gold,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
               ),
             ),
             const SizedBox(height: 18),
