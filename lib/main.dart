@@ -15,7 +15,6 @@ const int lessonCount = 18;
 
 // عناوين الدروس بالترتيب (اختياري).
 // إذا تركتها فارغة يظهر "الدرس 1، الدرس 2 ...".
-// مثال: const List<String> lessonTitles = ['العنوان الأول', 'العنوان الثاني'];
 const List<String> lessonTitles = [];
 
 String lessonTitle(int index) {
@@ -324,6 +323,40 @@ class _VideoPageState extends State<VideoPage> {
               child: YoutubePlayer(
                 controller: controller,
                 aspectRatio: 16 / 9,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // سطر تشخيص مؤقت: يعرض حالة المشغّل ونوع الخطأ
+            YoutubeValueBuilder(
+              controller: controller,
+              builder: (context, value) {
+                return Text(
+                  'حالة المشغّل: ${value.playerState.name} | الخطأ: ${value.error.name}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => openExternal(
+                  'https://www.youtube.com/watch?list=$playlistId&index=${widget.index + 1}',
+                ),
+                icon: const Icon(Icons.open_in_new),
+                label: const Text(
+                  'فتح الدرس في يوتيوب',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: gold,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 18),
