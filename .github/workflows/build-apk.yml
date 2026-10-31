@@ -25,7 +25,7 @@ jobs:
           cache: true
 
       - name: Create Android project files
-        run: flutter create --platforms=android --project-name rewaq_alkhatt --org com.dahshan .
+        run: flutter create --platforms=android --project-name rewaq_alkhatt --org com.dahshan.naskhcourse .
 
       - name: Allow internet access in release build
         run: |
@@ -42,7 +42,7 @@ jobs:
             android: true
             ios: false
             image_path: "assets/icon/icon.png"
-            adaptive_icon_background: "#0B1F4B"
+            adaptive_icon_background: "#B71C1C"
             adaptive_icon_foreground: "assets/icon/icon_foreground.png"
           EOF
           dart run flutter_launcher_icons
@@ -53,5 +53,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: rewaq-alkhatt-apk
+          name: naskh-course-apk
           path: build/app/outputs/flutter-apk/app-release.apk
