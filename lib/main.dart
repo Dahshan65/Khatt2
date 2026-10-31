@@ -6,6 +6,24 @@ const green = Color(0xFF2E6B57);
 const gold = Color(0xFF8B6914);
 const cream = Color(0xFFF8F4EA);
 
+// ===== إعدادات الدورة =====
+// رقم قائمة التشغيل على يوتيوب
+const String playlistId = 'PLKhU4fSVw_-I';
+
+// عدد الفيديوهات في القائمة
+const int lessonCount = 18;
+
+// عناوين الدروس بالترتيب (اختياري).
+// إذا تركتها فارغة يظهر "الدرس 1، الدرس 2 ...".
+// مثال: const List<String> lessonTitles = ['العنوان الأول', 'العنوان الثاني'];
+const List<String> lessonTitles = [];
+
+String lessonTitle(int index) {
+  if (index < lessonTitles.length) return lessonTitles[index];
+  return 'الدرس ${index + 1}';
+}
+// ==========================
+
 void main() {
   runApp(const RewaqApp());
 }
@@ -31,32 +49,6 @@ class RewaqApp extends StatelessWidget {
     );
   }
 }
-
-class Lesson {
-  final String title;
-  final String videoId;
-
-  const Lesson(this.title, this.videoId);
-}
-
-const List<Lesson> lessons = [
-  Lesson('إعلان دورة تحسين الكتابة بخط النسخ', '19vpZWc3GOg'),
-  Lesson('التعريف بدورة تحسين الكتابة بخط النسخ', 'hfx1nwqD7oI'),
-  Lesson('الحروف المفردة بخط النسخ وتقسيماتها', 'uiDRjMCvbFY'),
-  Lesson('الحروف العامودية – المادة النظرية', 'gBowWq6FFzY'),
-  Lesson('شرح طريقة كتابة اللام ألف (لأ)', 'YXBhWqJbojY'),
-  Lesson('الحروف العامودية – الدرس العملي', 'UcvfRO46pO4'),
-  Lesson('الحروف الكأسية – شرح نظري', '0c6MgEBZWHA'),
-  Lesson('تطبيقات وتمارين الحروف الكأسية', 'rWIil56x7a8'),
-  Lesson('الحروف الطبقية (ب، ف) والحروف ذات الأقواس (ح، غ)', 'eSdlhM7Lesw'),
-  Lesson('تمارين الحروف الطبقية [ب، ت، ث، ف]', 'kLOrYsuQS7U'),
-  Lesson('الأخطاء في كتابة الحروف الطبقية (ب، ف)', '8ClIFIrd7j0'),
-  Lesson('تمارين على الحروف (ج، ح، خ، ع، غ)', 'FdlwWzkMJyU'),
-  Lesson('خواص حرف ج', '2oxuGHMWJxA'),
-  Lesson('الحروف (ر، و، م، د، هـ، ى)', '8jD6NIW36eU'),
-  Lesson('تمارين الحروف المفردة باستخدام الدوائر', 'wS9ympf4ocU'),
-  Lesson('خواص حرف النون والراء آخر الكلمة', '9P0bE23k0io'),
-];
 
 Future<void> openExternal(String address) async {
   final uri = Uri.parse(address);
@@ -211,14 +203,12 @@ class CoursePage extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('دورة تحسين الكتابة بخط النسخ'),
+          title: const Text('دورة حروف خط النسخ بالقلم العادي'),
         ),
         body: ListView.builder(
           padding: const EdgeInsets.all(12),
-          itemCount: lessons.length,
+          itemCount: lessonCount,
           itemBuilder: (context, index) {
-            final lesson = lessons[index];
-
             return Card(
               color: Colors.white,
               margin: const EdgeInsets.only(bottom: 10),
@@ -242,7 +232,7 @@ class CoursePage extends StatelessWidget {
                   ),
                 ),
                 title: Text(
-                  lesson.title,
+                  lessonTitle(index),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -257,7 +247,7 @@ class CoursePage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => VideoPage(lesson: lesson),
+                      builder: (_) => VideoPage(index: index),
                     ),
                   );
                 },
@@ -271,9 +261,9 @@ class CoursePage extends StatelessWidget {
 }
 
 class VideoPage extends StatefulWidget {
-  final Lesson lesson;
+  final int index;
 
-  const VideoPage({super.key, required this.lesson});
+  const VideoPage({super.key, required this.index});
 
   @override
   State<VideoPage> createState() => _VideoPageState();
@@ -286,15 +276,19 @@ class _VideoPageState extends State<VideoPage> {
   void initState() {
     super.initState();
 
-    controller = YoutubePlayerController.fromVideoId(
-      videoId: widget.lesson.videoId,
-      autoPlay: false,
+    controller = YoutubePlayerController(
       params: const YoutubePlayerParams(
         showControls: true,
         showFullscreenButton: true,
         strictRelatedVideos: true,
         playsInline: true,
       ),
+    );
+
+    controller.cuePlaylist(
+      list: const [playlistId],
+      listType: ListType.playlist,
+      index: widget.index,
     );
   }
 
@@ -316,7 +310,7 @@ class _VideoPageState extends State<VideoPage> {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              widget.lesson.title,
+              lessonTitle(widget.index),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 21,
