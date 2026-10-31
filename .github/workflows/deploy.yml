@@ -1,9 +1,8 @@
-name: Deploy Flutter Web
+name: Deploy Web to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -11,28 +10,33 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Get source code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Build Flutter web app
-        working-directory: rewaq_alkhatt
-        run: |
-          flutter pub get
-          flutter build web --release --base-href /Rewaq_Alkhatt/
+      - name: Get packages
+        run: flutter pub get
 
-      - name: Upload web files
+      - name: Build web
+        run: flutter build web --release --base-href /Khatt2/
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: rewaq_alkhatt/build/web
+          path: build/web
 
   deploy:
     needs: build
@@ -41,6 +45,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Publish website
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
