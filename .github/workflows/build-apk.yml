@@ -34,6 +34,19 @@ jobs:
       - name: Get packages
         run: flutter pub get
 
+      - name: Add app icon
+        run: |
+          flutter pub add --dev flutter_launcher_icons
+          cat > flutter_launcher_icons.yaml <<'EOF'
+          flutter_launcher_icons:
+            android: true
+            ios: false
+            image_path: "assets/icon/icon.png"
+            adaptive_icon_background: "#0B1F4B"
+            adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+          EOF
+          dart run flutter_launcher_icons
+
       - name: Build release APK
         run: flutter build apk --release
 
